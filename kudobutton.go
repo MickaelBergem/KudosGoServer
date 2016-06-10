@@ -14,11 +14,18 @@ type KudoButton struct {
 }
 
 //
-func (kudoButton *KudoButton) save() int {
-	fmt.Printf("Method save() called for Kudo button at %s.\n", kudoButton.URL)
-	// filename := p.Title + ".txt"
-	// return ioutil.WriteFile(filename, p.Body, 0600)
-	return 0
+func (kudoButton *KudoButton) create() {
+
+	db, err := sql.Open("sqlite3", databaseUrl)
+	checkErr(err)
+
+	stmt, err := db.Prepare("INSERT INTO kudos (KudoID, KudoCount, URL) VALUES (?, ?, ?)")
+	checkErr(err)
+
+	_, err = stmt.Exec(kudoButton.ID, kudoButton.KudoCount, kudoButton.URL)
+	checkErr(err)
+
+	db.Close()
 }
 
 // getCurrentCount returns the current number of Kudos for the given ID
@@ -28,7 +35,7 @@ func getCurrentCount(kudoID string) int {
 
 func getKudoButton(kudoID string) *KudoButton {
 
-	db, err := sql.Open("sqlite3", "./kudos_count.sqlite3")
+	db, err := sql.Open("sqlite3", databaseUrl)
 	checkErr(err)
 	stmt, err := db.Prepare("SELECT KudoCount, URL FROM kudos WHERE KudoID = ?")
 	checkErr(err)
@@ -60,7 +67,7 @@ func getKudoButton(kudoID string) *KudoButton {
 
 // Increase the KudoButton with kudoID and return 1 if there was a matching KudoButton
 func increaseKudoButton(kudoID string) int64 {
-	db, err := sql.Open("sqlite3", "./kudos_count.sqlite3")
+	db, err := sql.Open("sqlite3", databaseUrl)
 	checkErr(err)
 	stmt, err := db.Prepare("UPDATE kudos SET KudoCount = KudoCount + 1 WHERE KudoID = ?")
 	checkErr(err)

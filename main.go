@@ -10,6 +10,11 @@ import (
 	"strconv"
 )
 
+var (
+	portNumber  int
+	databaseUrl string
+)
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Got a %s request on %s\n", r.Method, r.URL)
 
@@ -42,7 +47,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	portNumber := 8090
+
+	portNumber = 8090
+	databaseUrl = "./kudos_count.sqlite3"
 
 	fmt.Printf("Launching Kudos Server...\n")
 

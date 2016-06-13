@@ -1,7 +1,7 @@
 # Kudos server
 
-A test Kudos Server, able to track count of the number of Kudos given with a
-given button.
+A test Kudos Server, able to track the number of Kudos given with a given
+button.
 
     go get github.com/MickaelBergem/KudosPlease
     ./KudosPlease
@@ -18,6 +18,14 @@ Once the server is running, you can send HTTP request:
     curl -X POST http://localhost:8090/new-awesome-blogpost
     # Create a new button
     curl -X PUT -d 'URL=http://blog.securem.eu/new-awesome-blogpost/' http://localhost:8090/new-awesome-blogpost
+
+## Docker
+
+You can package the server in a Docker container with the provided Dockerfile:
+
+    go build --ldflags '-extldflags "-static"' -o main .
+
+The resulting container image will weigh only ~12MB.
 
 ## Testing
 

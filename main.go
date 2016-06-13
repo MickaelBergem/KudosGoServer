@@ -86,7 +86,7 @@ func main() {
 	portNumber = 8090
 	databaseURL = "./kudos_count.sqlite3"
 
-	fmt.Printf("Launching Kudos Server...\n")
+	fmt.Printf("Launching Kudos Server on port %d...\n", portNumber)
 
 	if _, err := os.Stat(databaseURL); os.IsNotExist(err) {
 		// The database does not exist, attempt to create it

@@ -21,9 +21,17 @@ Once the server is running, you can send HTTP request:
 
 ## Docker
 
-You can package the server in a Docker container with the provided Dockerfile:
+A lightweigh Docker container is available on DockerHub:
 
+    docker pull suixo/kudosplease
+    docker run --rm -it -v `pwd`/kudos_count.sqlite3:/kudos_count.sqlite3 --name kudosplease -p 80:8090 suixo/kudosplease
+
+You can build the container image yourself with the provided Dockerfile:
+
+    # First, statically compile the server
     go build --ldflags '-extldflags "-static"' -o main .
+    # Then, copy it inside the image
+    docker build -t kudosplease .
 
 The resulting container image will weigh only ~12MB.
 

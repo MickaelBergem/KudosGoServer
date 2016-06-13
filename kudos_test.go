@@ -1,9 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
-	"io/ioutil"
 	"testing"
 )
 
@@ -13,7 +10,9 @@ import (
 // var db sql.SQL
 
 func TestReverse(t *testing.T) {
-	setUp()
+
+	databaseURL = "file:test.db?cache=shared&mode=memory"
+	setUpDatabase()
 
 	testButton := KudoButton{
 		URL: "http://coucou/",
@@ -41,21 +40,4 @@ func TestReverse(t *testing.T) {
 	if affectedButton != 1 || getCurrentCount(testButton.ID) != 1 {
 		t.Errorf("Increasing a button should increment the kudoCount")
 	}
-
-}
-
-func setUp() {
-	databaseUrl = "file:test.db?cache=shared&mode=memory"
-
-	db, err := sql.Open("sqlite3", databaseUrl)
-
-	body, err := ioutil.ReadFile("initdb.sql")
-	checkErr(err)
-
-	db.Exec(string(body))
-}
-
-func tearDown() {
-	// Close the DB connection
-	// db.Close()
 }

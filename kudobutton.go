@@ -13,19 +13,14 @@ type KudoButton struct {
 	KudoCount int
 }
 
-//
-func (kudoButton *KudoButton) create() {
-
-	db, err := sql.Open("sqlite3", databaseUrl)
-	checkErr(err)
-
-	stmt, err := db.Prepare("INSERT INTO kudos (KudoID, KudoCount, URL) VALUES (?, ?, ?)")
-	checkErr(err)
-
-	_, err = stmt.Exec(kudoButton.ID, kudoButton.KudoCount, kudoButton.URL)
-	checkErr(err)
-
+// Create the database and load the schema
+func (kudoButton *KudoButton) create() bool {
+	db, _ := sql.Open("sqlite3", databaseURL)
+	stmt, _ := db.Prepare("INSERT INTO kudos (KudoID, KudoCount, URL) VALUES (?, ?, ?)")
+	_, err := stmt.Exec(kudoButton.ID, kudoButton.KudoCount, kudoButton.URL)
 	db.Close()
+
+	return err == nil
 }
 
 // getCurrentCount returns the current number of Kudos for the given ID
@@ -35,7 +30,7 @@ func getCurrentCount(kudoID string) int {
 
 func getKudoButton(kudoID string) *KudoButton {
 
-	db, err := sql.Open("sqlite3", databaseUrl)
+	db, err := sql.Open("sqlite3", databaseURL)
 	checkErr(err)
 	stmt, err := db.Prepare("SELECT KudoCount, URL FROM kudos WHERE KudoID = ?")
 	checkErr(err)
@@ -67,7 +62,7 @@ func getKudoButton(kudoID string) *KudoButton {
 
 // Increase the KudoButton with kudoID and return 1 if there was a matching KudoButton
 func increaseKudoButton(kudoID string) int64 {
-	db, err := sql.Open("sqlite3", databaseUrl)
+	db, err := sql.Open("sqlite3", databaseURL)
 	checkErr(err)
 	stmt, err := db.Prepare("UPDATE kudos SET KudoCount = KudoCount + 1 WHERE KudoID = ?")
 	checkErr(err)

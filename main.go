@@ -5,14 +5,18 @@ package main
 */
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 )
 
 var (
 	portNumber  int
-	databaseUrl string
+	databaseURL string
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -30,14 +34,36 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == "PUT" {
+	if r.Method == "POST" {
 		// We want to increase the corresponding kudo Button
 		fmt.Printf("Increasing KudoButton with ID %s\n", kudoID)
 		affectedButtons := increaseKudoButton(kudoID)
 		if affectedButtons == 1 {
 			fmt.Fprintf(w, "Button increased :)")
 		} else {
+			w.WriteHeader(400)
 			fmt.Fprintf(w, "Unknown button... :(")
+		}
+		return
+	}
+
+	if r.Method == "PUT" {
+		// We want to create the corresponding button
+		err := r.ParseForm()
+		checkErr(err)
+
+		var kudoButton KudoButton
+		kudoButton.ID = kudoID
+		kudoButton.URL = r.PostFormValue("URL")
+		success := kudoButton.create()
+
+		if success {
+			fmt.Printf("Created new button for ID %s at URL %s\n", kudoButton.ID, kudoButton.URL)
+			fmt.Fprintf(w, "Button successfully created")
+		} else {
+			w.WriteHeader(400)
+			fmt.Printf("Error while creating the button, does the button already exist?\n")
+			fmt.Fprintf(w, "Error while creating the button, does the button already exist?")
 		}
 		return
 	}
@@ -46,12 +72,28 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(405)
 }
 
+func setUpDatabase() {
+	db, err := sql.Open("sqlite3", databaseURL)
+
+	body, err := ioutil.ReadFile("initdb.sql")
+	checkErr(err)
+
+	db.Exec(string(body))
+}
+
 func main() {
 
 	portNumber = 8090
-	databaseUrl = "./kudos_count.sqlite3"
+	databaseURL = "./kudos_count.sqlite3"
 
 	fmt.Printf("Launching Kudos Server...\n")
+
+	if _, err := os.Stat(databaseURL); os.IsNotExist(err) {
+		// The database does not exist, attempt to create it
+		fmt.Print("Database not found, trying to initialize it...")
+		setUpDatabase()
+		fmt.Print(" done.\n")
+	}
 
 	// TODO: handle errors here
 	http.HandleFunc("/", handler)
